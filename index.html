@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FlashFormula - formula flashcards for first-year engineering</title>
+<meta name="description" content="Private formula flashcards for physics, math and chemistry. Flip, mark what you know, add your own cards. No login, progress stays in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23120f24'/%3E%3Cpath d='M11 8h10M11 16h7M11 24h9' stroke='%23a99cff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#120f24;--bg2:#0b0917;--card:#1c1838;--line:#2e2952;--ink:#f0edff;--mut:#9d95c9;--acc:#a99cff;--acc-d:#7c68e0;--ok:#4ade80;--warn:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--ink);font:15px/1.55 system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto;padding:26px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+h1{font-size:26px;letter-spacing:.3px}
+h1 em{color:var(--acc);font-style:normal}
+.sub-h{color:var(--mut);font-size:13.5px}
+.prog{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px}
+.prog .bar{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-top:8px}
+.prog .bar i{display:block;height:100%;background:var(--ok);transition:width .4s}
+.prog .lbl{font:700 10.5px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1.2px;color:var(--mut);display:flex;justify-content:space-between}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font:600 12.5px system-ui,sans-serif;background:none;border:1px solid var(--line);color:var(--mut);border-radius:20px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.stage{perspective:1200px;margin-bottom:14px}
+.card-flip{position:relative;width:100%;min-height:240px;cursor:pointer;transform-style:preserve-3d;transition:transform .55s;user-select:none}
+.card-flip.flipped{transform:rotateX(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px}
+.face.back{transform:rotateX(180deg);background:#221d45}
+.face .cat{font:700 10.5px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc)}
+.face h2{font-size:22px}
+.face .hint{color:var(--mut);font-size:13.5px}
+.face .formula{font:600 21px/1.5 ui-monospace,monospace;color:var(--ink)}
+.face .means{color:var(--mut);font-size:13.5px;max-width:460px}
+.face .tap{position:absolute;bottom:12px;font-size:11.5px;color:var(--mut);letter-spacing:.6px}
+.btns{display:flex;gap:10px;margin-bottom:16px}
+.btns button{flex:1;font:700 14px system-ui,sans-serif;cursor:pointer;border-radius:10px;padding:12px;border:1px solid var(--line)}
+#know{background:var(--ok);border-color:var(--ok);color:#052b12}
+#dont{background:none;color:var(--warn);border-color:var(--warn)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+button.ghost{background:none;border:1px solid var(--line);color:var(--mut);font:600 12.5px system-ui,sans-serif;border-radius:8px;padding:8px 14px;cursor:pointer}
+button.ghost:hover{color:var(--ink);border-color:var(--mut)}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+summary{cursor:pointer;font-weight:600;color:var(--acc)}
+details form{display:grid;gap:8px;margin-top:12px}
+details input,details select{background:var(--bg2);border:1px solid var(--line);border-radius:7px;color:var(--ink);padding:9px 10px;font:14px system-ui,sans-serif;width:100%}
+details button{font:700 13px system-ui,sans-serif;cursor:pointer;border-radius:8px;padding:9px 16px;border:1px solid var(--acc);background:var(--acc);color:#17102e;width:fit-content}
+.list-h{font:700 11px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin:6px 0 8px}
+.mini{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 12px;margin-bottom:6px;font-size:13.5px}
+.mini .st{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none}
+.mini.known .st{background:var(--ok)}
+.mini .n{flex:1}
+.mini .c{color:var(--mut);font-size:12px}
+.mini .x{border:none;background:none;color:var(--mut);font-size:16px;cursor:pointer;padding:0 4px}
+.mini .x:hover{color:#f87171}
+footer{color:var(--mut);font-size:13px;margin-top:24px;padding-top:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>Flash<em>Formula</em></h1><div class="sub-h">The formulas keep escaping. Catch them one card at a time.</div></div>
+</header>
+
+<div class="prog">
+  <div class="lbl"><span id="progTxt">0 of 0 mastered</span><span id="progPct"></span></div>
+  <div class="bar"><i id="progFill" style="width:0%"></i></div>
+</div>
+
+<div class="chips" id="chips"></div>
+
+<div class="stage">
+  <div class="card-flip" id="card" role="button" tabindex="0" aria-label="Flashcard - activate to flip">
+    <div class="face front">
+      <span class="cat" id="fCat"></span>
+      <h2 id="fName"></h2>
+      <p class="hint" id="fHint"></p>
+      <span class="tap">TAP TO REVEAL THE FORMULA</span>
+    </div>
+    <div class="face back">
+      <span class="cat" id="bCat"></span>
+      <p class="formula" id="bFormula"></p>
+      <p class="means" id="bMeans"></p>
+      <span class="tap">TAP TO FLIP BACK</span>
+    </div>
+  </div>
+</div>
+
+<div class="btns">
+  <button id="dont">Still learning</button>
+  <button id="know">I know this one</button>
+</div>
+
+<div class="row">
+  <button class="ghost" id="shuffle">Shuffle deck</button>
+  <button class="ghost" id="reset">Reset progress</button>
+</div>
+
+<details>
+  <summary>Add your own card</summary>
+  <form id="addForm">
+    <input id="aName" placeholder="Card name (e.g. Ohm's law)" maxlength="60" required>
+    <input id="aFormula" placeholder="Formula (e.g. V = I x R)" maxlength="80" required>
+    <input id="aMeans" placeholder="What the symbols mean (optional)" maxlength="140">
+    <select id="aCat"><option>Physics</option><option>Math</option><option>Chemistry</option></select>
+    <button type="submit">Add card</button>
+  </form>
+</details>
+
+<div class="list-h" id="listH">Deck</div>
+<div id="list"></div>
+
+<footer>
+  <p>Cards and progress stay in this browser (localStorage) - no account, no sync. The built-in deck covers first-year physics, math and chemistry basics; add your own cards for anything missing. Built by Kanishk Saini as a learning project.</p>
+</footer>
+</div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const KEY='flashformula_v1';
+const BUILTIN=[
+{c:'Physics',n:'Velocity from acceleration',f:'v = u + at',w:'u = starting velocity, a = acceleration, t = time. Constant acceleration only.',h:'The first equation of motion'},
+{c:'Physics',n:'Distance from acceleration',f:'s = ut + \u00BDat\u00B2',w:'s = displacement, u = starting velocity, a = acceleration, t = time.',h:'The second equation of motion'},
+{c:'Physics',n:'Velocity squared',f:'v\u00B2 = u\u00B2 + 2as',w:'Links velocity and displacement without needing time.',h:'The third equation of motion'},
+{c:'Physics',n:"Newton's second law",f:'F = ma',w:'Force = mass x acceleration. The more mass, the more force you need for the same push.',h:'Force and motion'},
+{c:'Physics',n:'Kinetic energy',f:'KE = \u00BDmv\u00B2',w:'Energy of motion. Velocity is squared, so doubling speed quadruples the energy.',h:'Energy of a moving object'},
+{c:'Physics',n:'Potential energy',f:'PE = mgh',w:'Stored energy from height: mass x gravity (9.8) x height.',h:'Energy from height'},
+{c:'Physics',n:'Momentum',f:'p = mv',w:'Momentum = mass x velocity. Conserved in collisions.',h:'Mass in motion'},
+{c:'Physics',n:'Work done',f:'W = Fs cos \u03B8',w:'Force x displacement x cos of the angle between them. Zero if you push perpendicular to motion.',h:'Force over a distance'},
+{c:'Physics',n:"Ohm's law",f:'V = IR',w:'Voltage = current x resistance. The water-pipe rule of circuits.',h:'Circuits, the classic'},
+{c:'Physics',n:'Electrical power',f:'P = VI',w:'Power = voltage x current. Also P = I\u00B2R using Ohm\u2019s law.',h:'Watts in a circuit'},
+{c:'Math',n:'Quadratic formula',f:'x = (-b \u00B1 \u221A(b\u00B2 - 4ac)) / 2a',w:'Solves ax\u00B2 + bx + c = 0. b\u00B2 - 4ac (the discriminant) tells you how many real roots exist.',h:'Solving ax\u00B2 + bx + c = 0'},
+{c:'Math',n:'Power rule (differentiate)',f:'d/dx (x\u207F) = nx\u207F\u207B\u00B9',w:'Bring the power down, subtract one. Works for any real n.',h:'Derivatives, the workhorse'},
+{c:'Math',n:'Power rule (integrate)',f:'\u222B x\u207F dx = x\u207F\u207A\u00B9/(n+1) + C',w:'Add one to the power, divide by it. Do not forget + C.',h:'Integration, the reverse'},
+{c:'Math',n:'Pythagorean identity',f:'sin\u00B2\u03B8 + cos\u00B2\u03B8 = 1',w:'The identity behind half of trigonometry. Divide by cos\u00B2 to get 1 + tan\u00B2 = sec\u00B2.',h:'Trig in one line'},
+{c:'Math',n:'Slope of a line',f:'m = (y\u2082 - y\u2081) / (x\u2082 - x\u2081)',w:'Rise over run between two points. Horizontal line: m = 0.',h:'Two points, one slope'},
+{c:'Math',n:'Log product rule',f:'log(ab) = log a + log b',w:'Multiplication inside becomes addition outside. log(a/b) = log a - log b.',h:'Logs made friendlier'},
+{c:'Math',n:'Binomial square',f:'(a + b)\u00B2 = a\u00B2 + 2ab + b\u00B2',w:'Not a\u00B2 + b\u00B2 - the middle term 2ab is the one everyone drops.',h:'Expansion you will use weekly'},
+{c:'Chemistry',n:'Ideal gas law',f:'PV = nRT',w:'Pressure x volume = moles x gas constant x temperature (in kelvin).',h:'Gases in one equation'},
+{c:'Chemistry',n:'Moles from mass',f:'n = m / M',w:'Moles = mass of sample / molar mass of the substance. The gateway to every mole calculation.',h:'Counting particles by weighing'},
+{c:'Chemistry',n:'Concentration',f:'c = n / V',w:'Concentration = moles of solute / volume of solution in litres (mol/L or molar).',h:'How strong is the solution'},
+{c:'Chemistry',n:'pH',f:'pH = -log[H\u207A]',w:'Negative log of hydrogen-ion concentration. Below 7 acidic, above 7 basic.',h:'Acid or base, in one number'}
+];
+let state={known:[],custom:[],order:null};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.known))state=s;}catch(e){}
+const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const deck=()=>BUILTIN.concat(state.custom);
+const id=c=>c.c+'|'+c.n;
+let filter='All', cur=0, flipped=false, order=[];
+
+function rebuildOrder(){
+  const d=deck().filter(c=>filter==='All'||c.c===filter);
+  order=d.map((_,i)=>i); cur=0;
+  if(state.order&&state.order.length===order.length)order=state.order;
+}
+function currentCards(){return deck().filter(c=>filter==='All'||c.c===filter);}
+function renderChips(){
+  $('#chips').replaceChildren(...['All','Physics','Math','Chemistry'].map(c=>{
+    const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=c;
+    b.setAttribute('aria-pressed',String(c===filter));
+    b.onclick=()=>{filter=c;state.order=null;rebuildOrder();flipped=false;render();};
+    return b;
+  }));
+}
+function renderCard(){
+  const cards=currentCards();
+  if(!cards.length){
+    $('#fCat').textContent='';$('#fName').textContent='No cards here';$('#fHint').textContent='Pick another category or add your own below.';
+    $('#bFormula').textContent='';$('#bMeans').textContent='';$('#bCat').textContent='';
+    return;
+  }
+  cur=Math.min(cur,cards.length-1);
+  const c=cards[order[cur]];
+  $('#card').classList.toggle('flipped',flipped);
+  $('#fCat').textContent=c.c.toUpperCase();$('#fName').textContent=c.n;
+  $('#fHint').textContent=c.h||'What is the formula?';
+  $('#bCat').textContent=c.c.toUpperCase();$('#bFormula').textContent=c.f;
+  $('#bMeans').textContent=c.w||'';
+}
+function renderProg(){
+  const d=deck(),k=d.filter(c=>state.known.includes(id(c))).length;
+  $('#progTxt').textContent=k+' of '+d.length+' mastered';
+  $('#progPct').textContent=d.length?Math.round(k/d.length*100)+'%':'';
+  $('#progFill').style.width=(d.length?k/d.length*100:0)+'%';
+}
+function renderList(){
+  $('#listH').textContent='Deck ('+currentCards().length+' shown, '+state.custom.length+' your own)';
+  $('#list').replaceChildren(...currentCards().map(c=>{
+    const el=document.createElement('div');el.className='mini'+(state.known.includes(id(c))?' known':'');
+    const st=document.createElement('span');st.className='st';
+    const n=document.createElement('span');n.className='n';n.textContent=c.n;
+    const cc=document.createElement('span');cc.className='c';cc.textContent=c.c;
+    el.append(st,n,cc);
+    if(state.custom.includes(c)){
+      const x=document.createElement('button');x.className='x';x.textContent='\u00D7';x.title='remove';
+      x.onclick=()=>{state.custom=state.custom.filter(k=>k!==c);state.known=state.known.filter(k=>k!==id(c));save();rebuildOrder();render();};
+      el.append(x);
+    }
+    return el;
+  }));
+}
+function render(){renderChips();renderCard();renderProg();renderList();}
+function flip(){flipped=!flipped;renderCard();}
+$('#card').addEventListener('click',flip);
+$('#card').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();}});
+function next(markKnown){
+  const cards=currentCards();if(!cards.length)return;
+  const c=cards[order[cur]],cid=id(c);
+  if(markKnown&&!state.known.includes(cid))state.known.push(cid);
+  if(!markKnown)state.known=state.known.filter(k=>k!==cid);
+  save();
+  flipped=false;cur=(cur+1)%cards.length;render();
+}
+$('#know').onclick=()=>next(true);
+$('#dont').onclick=()=>next(false);
+$('#shuffle').onclick=()=>{
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  state.order=order;save();cur=0;flipped=false;render();
+};
+$('#reset').onclick=()=>{
+  if(!state.known.length)return;
+  if(confirm('Mark every card as not known yet?')){state.known=[];save();render();}
+};
+$('#addForm').onsubmit=e=>{
+  e.preventDefault();
+  const c={c:$('#aCat').value,n:$('#aName').value.trim(),f:$('#aFormula').value.trim(),w:$('#aMeans').value.trim(),h:'Your own card'};
+  if(!c.n||!c.f)return;
+  state.custom.push(c);state.order=null;save();rebuildOrder();render();
+  $('#aName').value='';$('#aFormula').value='';$('#aMeans').value='';
+};
+rebuildOrder();render();
+</script>
+</body>
+</html>

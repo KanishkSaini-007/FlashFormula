@@ -111,7 +111,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px;padding-top:14px;border-t
 <div id="list"></div>
 
 <footer>
-  <p>Cards and progress stay in this browser (localStorage) - no account, no sync. The built-in deck covers first-year physics, math and chemistry basics; add your own cards for anything missing. Built by Kanishk Saini as a learning project.</p>
+  <p>Cards and progress stay in this browser (localStorage) - no account, no sync. The built-in deck covers first-year physics, math and chemistry basics; add your own cards for anything missing. Keyboard: arrow keys move between cards, space flips. Built by Kanishk Saini as a learning project.</p>
 </footer>
 </div>
 
@@ -205,6 +205,15 @@ function render(){renderChips();renderCard();renderProg();renderList();}
 function flip(){flipped=!flipped;renderCard();}
 $('#card').addEventListener('click',flip);
 $('#card').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();}});
+function move(d){
+  const cards=currentCards();if(!cards.length)return;
+  flipped=false;cur=(cur+d+cards.length)%cards.length;render();
+}
+document.addEventListener('keydown',e=>{
+  if(/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;
+  if(e.key==='ArrowRight'){e.preventDefault();move(1);}
+  else if(e.key==='ArrowLeft'){e.preventDefault();move(-1);}
+});
 function next(markKnown){
   const cards=currentCards();if(!cards.length)return;
   const c=cards[order[cur]],cid=id(c);

@@ -2,7 +2,7 @@
 
 Formula flashcards for first-year engineering - the formulas keep escaping, so catch them one card at a time.
 
-**Live:** https://kanishksaini-007.github.io/FlashFormula/
+**Live:** https://kanishk-saini-007.github.io/FlashFormula/
 
 ## What it does
 
